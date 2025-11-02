@@ -114,6 +114,10 @@ const typeNames = {
     fairy: 'Fee'
 };
 
+// Pokemon name cache for German to English mapping
+let pokemonNameCache = null;
+let cacheLoading = false;
+
 // DOM Elements
 const pokemonInput = document.getElementById('pokemonInput');
 const searchBtn = document.getElementById('searchBtn');
@@ -129,6 +133,61 @@ pokemonInput.addEventListener('keypress', (e) => {
     }
 });
 
+// Load Pokemon names with German translations from PokeAPI
+async function loadPokemonNames() {
+    if (pokemonNameCache) {
+        return pokemonNameCache;
+    }
+
+    if (cacheLoading) {
+        // Wait for ongoing cache load
+        while (cacheLoading) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        return pokemonNameCache;
+    }
+
+    cacheLoading = true;
+    const germanToEnglish = {};
+
+    try {
+        // Fetch list of Pokemon (covering all generations up to Gen 9)
+        const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1025');
+        const data = await response.json();
+
+        // Fetch species data in batches to get German names
+        const batchSize = 50;
+        for (let i = 0; i < data.results.length; i += batchSize) {
+            const batch = data.results.slice(i, i + batchSize);
+            const promises = batch.map(async (pokemon) => {
+                try {
+                    const id = pokemon.url.split('/').filter(Boolean).pop();
+                    const speciesResponse = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
+                    const speciesData = await speciesResponse.json();
+
+                    // Find German name
+                    const germanNameObj = speciesData.names.find(n => n.language.name === 'de');
+                    if (germanNameObj) {
+                        germanToEnglish[germanNameObj.name.toLowerCase()] = pokemon.name;
+                    }
+                } catch (error) {
+                    console.error(`Error fetching species ${pokemon.name}:`, error);
+                }
+            });
+
+            await Promise.all(promises);
+        }
+
+        pokemonNameCache = germanToEnglish;
+        cacheLoading = false;
+        return germanToEnglish;
+    } catch (error) {
+        cacheLoading = false;
+        console.error('Error loading Pokemon names:', error);
+        throw error;
+    }
+}
+
 // Main search function
 async function searchPokemon() {
     const pokemonName = pokemonInput.value.trim().toLowerCase();
@@ -143,7 +202,33 @@ async function searchPokemon() {
     showLoading();
 
     try {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+        // Try fetching with the provided name (works for English names)
+        let response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+
+        // If not found, try German name lookup
+        if (!response.ok && response.status === 404) {
+            // Show message that we're loading German names
+            const loadingMsg = document.createElement('div');
+            loadingMsg.id = 'cacheLoadingMsg';
+            loadingMsg.style.cssText = 'color: #666; text-align: center; margin-top: 10px;';
+            loadingMsg.textContent = 'Lade deutsche Namen...';
+            loadingSpinner.parentElement.appendChild(loadingMsg);
+
+            // Load German name cache
+            const nameCache = await loadPokemonNames();
+
+            // Remove loading message
+            const msg = document.getElementById('cacheLoadingMsg');
+            if (msg) msg.remove();
+
+            // Look up German name in cache
+            const englishName = nameCache[pokemonName];
+
+            if (englishName) {
+                // Retry with English name
+                response = await fetch(`https://pokeapi.co/api/v2/pokemon/${englishName}`);
+            }
+        }
 
         if (!response.ok) {
             if (response.status === 404) {
@@ -158,6 +243,10 @@ async function searchPokemon() {
 
     } catch (error) {
         hideLoading();
+
+        // Clean up any loading messages
+        const msg = document.getElementById('cacheLoadingMsg');
+        if (msg) msg.remove();
 
         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
             showError(
