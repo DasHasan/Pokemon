@@ -131,12 +131,15 @@ pokemonInput.addEventListener('keypress', (e) => {
 
 // Main search function
 async function searchPokemon() {
-    const pokemonName = pokemonInput.value.trim().toLowerCase();
+    const userInput = pokemonInput.value.trim().toLowerCase();
 
-    if (!pokemonName) {
+    if (!userInput) {
         showError('Bitte geben Sie einen Pokémon-Namen ein.', 'Sie müssen einen Namen eingeben, um nach einem Pokémon zu suchen.');
         return;
     }
+
+    // Translate German name to English if needed
+    const pokemonName = translatePokemonName(userInput);
 
     hideError();
     hideResults();
@@ -147,7 +150,7 @@ async function searchPokemon() {
 
         if (!response.ok) {
             if (response.status === 404) {
-                throw new Error(`Pokémon "${pokemonName}" wurde nicht gefunden. Bitte überprüfen Sie die Schreibweise.`);
+                throw new Error(`Pokémon "${userInput}" wurde nicht gefunden. Bitte überprüfen Sie die Schreibweise (Deutsch oder Englisch).`);
             } else {
                 throw new Error(`Server-Fehler (${response.status}): Die API ist möglicherweise nicht erreichbar.`);
             }
