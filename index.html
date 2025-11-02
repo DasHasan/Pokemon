@@ -16,12 +16,15 @@
         <main>
             <div class="search-section">
                 <div class="input-group">
-                    <input
-                        type="text"
-                        id="pokemonInput"
-                        placeholder="Pokémon-Name eingeben..."
-                        autocomplete="off"
-                    >
+                    <div class="autocomplete-wrapper">
+                        <input
+                            type="text"
+                            id="pokemonInput"
+                            placeholder="Pokémon-Name eingeben..."
+                            autocomplete="off"
+                        >
+                        <div id="suggestions" class="suggestions hidden"></div>
+                    </div>
                     <button id="searchBtn" class="btn-primary">
                         Suchen
                     </button>

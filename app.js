@@ -118,22 +118,85 @@ const typeNames = {
 let pokemonNameCache = null;
 let cacheLoading = false;
 
+// Autocomplete data
+let allPokemonList = [];
+let selectedSuggestionIndex = -1;
+
 // DOM Elements
 const pokemonInput = document.getElementById('pokemonInput');
 const searchBtn = document.getElementById('searchBtn');
 const errorMessage = document.getElementById('errorMessage');
 const loadingSpinner = document.getElementById('loadingSpinner');
 const results = document.getElementById('results');
+const suggestionsContainer = document.getElementById('suggestions');
 
 // Event Listeners
 searchBtn.addEventListener('click', searchPokemon);
-pokemonInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        searchPokemon();
+
+// Input event for autocomplete
+pokemonInput.addEventListener('input', handleInputChange);
+
+// Keyboard navigation for autocomplete
+pokemonInput.addEventListener('keydown', handleKeyboardNavigation);
+
+// Close suggestions when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.autocomplete-wrapper')) {
+        hideSuggestions();
     }
 });
 
-// Load Pokemon names with German translations from PokeAPI
+// Load all Pokemon names for autocomplete
+async function loadAllPokemonNames() {
+    if (allPokemonList.length > 0) {
+        return allPokemonList;
+    }
+
+    try {
+        // Fetch list of Pokemon (covering all generations up to Gen 9)
+        const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1025');
+        const data = await response.json();
+
+        // Fetch species data in batches to get German names
+        const batchSize = 50;
+        const pokemonList = [];
+
+        for (let i = 0; i < data.results.length; i += batchSize) {
+            const batch = data.results.slice(i, i + batchSize);
+            const promises = batch.map(async (pokemon) => {
+                try {
+                    const id = pokemon.url.split('/').filter(Boolean).pop();
+                    const speciesResponse = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
+                    const speciesData = await speciesResponse.json();
+
+                    // Find German name
+                    const germanNameObj = speciesData.names.find(n => n.language.name === 'de');
+                    const germanName = germanNameObj ? germanNameObj.name : pokemon.name;
+
+                    return {
+                        english: pokemon.name,
+                        german: germanName,
+                        id: parseInt(id)
+                    };
+                } catch (error) {
+                    console.error(`Error fetching species ${pokemon.name}:`, error);
+                    return null;
+                }
+            });
+
+            const batchResults = await Promise.all(promises);
+            pokemonList.push(...batchResults.filter(p => p !== null));
+        }
+
+        allPokemonList = pokemonList;
+        return pokemonList;
+    } catch (error) {
+        console.error('Error loading Pokemon names:', error);
+        throw error;
+    }
+}
+
+// Load Pokemon names with German translations from PokeAPI (for search fallback)
 async function loadPokemonNames() {
     if (pokemonNameCache) {
         return pokemonNameCache;
@@ -151,7 +214,17 @@ async function loadPokemonNames() {
     const germanToEnglish = {};
 
     try {
-        // Fetch list of Pokemon (covering all generations up to Gen 9)
+        // If we already have the autocomplete list, use it
+        if (allPokemonList.length > 0) {
+            allPokemonList.forEach(pokemon => {
+                germanToEnglish[pokemon.german.toLowerCase()] = pokemon.english;
+            });
+            pokemonNameCache = germanToEnglish;
+            cacheLoading = false;
+            return germanToEnglish;
+        }
+
+        // Otherwise, fetch list of Pokemon
         const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=1025');
         const data = await response.json();
 
@@ -188,6 +261,115 @@ async function loadPokemonNames() {
     }
 }
 
+// Handle input changes for autocomplete
+async function handleInputChange(e) {
+    const value = e.target.value.trim();
+
+    if (value.length < 2) {
+        hideSuggestions();
+        return;
+    }
+
+    // Load Pokemon names if not already loaded
+    if (allPokemonList.length === 0) {
+        try {
+            await loadAllPokemonNames();
+        } catch (error) {
+            console.error('Error loading Pokemon names for autocomplete:', error);
+            return;
+        }
+    }
+
+    // Filter Pokemon by search term
+    const searchTerm = value.toLowerCase();
+    const matches = allPokemonList.filter(pokemon =>
+        pokemon.german.toLowerCase().includes(searchTerm) ||
+        pokemon.english.toLowerCase().includes(searchTerm)
+    ).slice(0, 10); // Limit to 10 suggestions
+
+    if (matches.length > 0) {
+        showSuggestions(matches);
+    } else {
+        hideSuggestions();
+    }
+}
+
+// Handle keyboard navigation
+function handleKeyboardNavigation(e) {
+    const suggestionItems = suggestionsContainer.querySelectorAll('.suggestion-item');
+
+    if (suggestionItems.length === 0) {
+        // If no suggestions and Enter is pressed, search
+        if (e.key === 'Enter') {
+            searchPokemon();
+        }
+        return;
+    }
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, suggestionItems.length - 1);
+        updateSelectedSuggestion(suggestionItems);
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+        updateSelectedSuggestion(suggestionItems);
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (selectedSuggestionIndex >= 0) {
+            const selectedItem = suggestionItems[selectedSuggestionIndex];
+            selectSuggestion(selectedItem.dataset.name);
+        } else {
+            searchPokemon();
+        }
+    } else if (e.key === 'Escape') {
+        hideSuggestions();
+    }
+}
+
+// Update selected suggestion highlight
+function updateSelectedSuggestion(items) {
+    items.forEach((item, index) => {
+        if (index === selectedSuggestionIndex) {
+            item.classList.add('selected');
+            item.scrollIntoView({ block: 'nearest' });
+        } else {
+            item.classList.remove('selected');
+        }
+    });
+}
+
+// Show suggestions
+function showSuggestions(matches) {
+    selectedSuggestionIndex = -1;
+    suggestionsContainer.innerHTML = matches.map(pokemon => `
+        <div class="suggestion-item" data-name="${pokemon.german}">
+            <span class="name-german">${pokemon.german}</span>
+            <span class="name-english">(${pokemon.english})</span>
+        </div>
+    `).join('');
+
+    // Add click handlers
+    suggestionsContainer.querySelectorAll('.suggestion-item').forEach(item => {
+        item.addEventListener('click', () => selectSuggestion(item.dataset.name));
+    });
+
+    suggestionsContainer.classList.remove('hidden');
+}
+
+// Hide suggestions
+function hideSuggestions() {
+    suggestionsContainer.classList.add('hidden');
+    selectedSuggestionIndex = -1;
+}
+
+// Select a suggestion
+function selectSuggestion(name) {
+    pokemonInput.value = name;
+    hideSuggestions();
+    searchPokemon();
+}
+
 // Main search function
 async function searchPokemon() {
     const pokemonName = pokemonInput.value.trim().toLowerCase();
@@ -199,6 +381,7 @@ async function searchPokemon() {
 
     hideError();
     hideResults();
+    hideSuggestions();
     showLoading();
 
     try {

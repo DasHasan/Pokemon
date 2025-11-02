@@ -51,8 +51,13 @@ header h1 {
     margin-bottom: 10px;
 }
 
-#pokemonInput {
+.autocomplete-wrapper {
     flex: 1;
+    position: relative;
+}
+
+#pokemonInput {
+    width: 100%;
     padding: 15px;
     font-size: 1rem;
     border: 2px solid #e0e0e0;
@@ -63,6 +68,49 @@ header h1 {
 #pokemonInput:focus {
     outline: none;
     border-color: #667eea;
+}
+
+/* Autocomplete Suggestions */
+.suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #667eea;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.suggestion-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover,
+.suggestion-item.selected {
+    background-color: #f0f0ff;
+}
+
+.suggestion-item .name-german {
+    font-weight: 600;
+    color: #333;
+}
+
+.suggestion-item .name-english {
+    font-size: 0.875rem;
+    color: #666;
+    margin-left: 8px;
 }
 
 .btn-primary {
