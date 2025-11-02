@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Typ-Schwächen Finder</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Pokémon Typ-Schwächen</h1>
+            <p class="subtitle">Finde die Schwächen deines Pokémon</p>
+        </header>
+
+        <main>
+            <div class="search-section">
+                <div class="input-group">
+                    <input
+                        type="text"
+                        id="pokemonInput"
+                        placeholder="Pokémon-Name eingeben..."
+                        autocomplete="off"
+                    >
+                    <button id="searchBtn" class="btn-primary">
+                        Suchen
+                    </button>
+                </div>
+                <p class="hint">z.B. Pikachu, Charizard, Mewtwo</p>
+            </div>
+
+            <!-- Error Message Section -->
+            <div id="errorMessage" class="error-message hidden">
+                <div class="error-icon">⚠️</div>
+                <div class="error-content">
+                    <h3 class="error-title">Fehler</h3>
+                    <p class="error-details"></p>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Lade Daten...</p>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results" class="results hidden">
+                <div class="pokemon-card">
+                    <div class="pokemon-header">
+                        <img id="pokemonSprite" src="" alt="Pokémon Sprite">
+                        <div class="pokemon-info">
+                            <h2 id="pokemonName"></h2>
+                            <div id="pokemonTypes" class="types"></div>
+                        </div>
+                    </div>
+
+                    <div class="weaknesses-section">
+                        <h3>Typ-Schwächen</h3>
+                        <div id="weaknessesGrid" class="weaknesses-grid"></div>
+                        <p class="weakness-note">Diese Attacken-Typen sind gegen dieses Pokémon besonders effektiv</p>
+                    </div>
+
+                    <div class="resistances-section">
+                        <h3>Resistenzen</h3>
+                        <div id="resistancesGrid" class="resistances-grid"></div>
+                        <p class="resistance-note">Diese Attacken-Typen sind gegen dieses Pokémon weniger effektiv</p>
+                    </div>
+
+                    <div class="immunities-section" id="immunitiesSection">
+                        <h3>Immunitäten</h3>
+                        <div id="immunitiesGrid" class="immunities-grid"></div>
+                        <p class="immunity-note">Diese Attacken-Typen haben keine Wirkung auf dieses Pokémon</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Daten von <a href="https://pokeapi.co/" target="_blank">PokéAPI</a></p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
