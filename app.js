@@ -129,6 +129,64 @@ pokemonInput.addEventListener('keypress', (e) => {
     }
 });
 
+// Cache for all Pokemon (loaded once)
+let allPokemonCache = null;
+
+// Load all Pokemon from API (called once)
+async function loadAllPokemon() {
+    if (allPokemonCache) return allPokemonCache;
+
+    try {
+        const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=2000');
+        const data = await response.json();
+        allPokemonCache = data.results;
+        return allPokemonCache;
+    } catch (e) {
+        return [];
+    }
+}
+
+// Search for Pokemon by German name using the API
+async function searchByGermanName(germanName) {
+    try {
+        // Search through Pokemon species for German name
+        // To balance speed vs coverage, we search in parallel batches
+        // This searches up to 300 Pokemon (covers Gen 1-3, most popular Pokemon)
+        const batchSize = 100;
+        const maxSearchId = 300; // Limit search for better performance
+
+        for (let i = 1; i <= maxSearchId; i += batchSize) {
+            const promises = [];
+
+            for (let id = i; id < i + batchSize && id <= maxSearchId; id++) {
+                promises.push(
+                    fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`)
+                        .then(res => res.ok ? res.json() : null)
+                        .catch(() => null)
+                );
+            }
+
+            const results = await Promise.all(promises);
+
+            for (const speciesData of results) {
+                if (!speciesData) continue;
+
+                const germanNameEntry = speciesData.names.find(
+                    n => n.language.name === 'de' && n.name.toLowerCase() === germanName
+                );
+
+                if (germanNameEntry) {
+                    return speciesData.name;
+                }
+            }
+        }
+
+        return null;
+    } catch (e) {
+        return null;
+    }
+}
+
 // Main search function
 async function searchPokemon() {
     const userInput = pokemonInput.value.trim().toLowerCase();
@@ -138,15 +196,29 @@ async function searchPokemon() {
         return;
     }
 
-    // Translate German name to English if needed
-    const pokemonName = translatePokemonName(userInput);
-
     hideError();
     hideResults();
     showLoading();
 
     try {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+        // Step 1: Try with local mapping first (fast cache)
+        let pokemonName = translatePokemonName(userInput);
+
+        // Step 2: Try direct API call
+        let response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+
+        // Step 3: If 404 and input looks like it might be German, search via API
+        if (!response.ok && response.status === 404 && pokemonName === userInput) {
+            // The name wasn't in our local cache, try searching via API
+            updateLoadingMessage('Suche in deutscher Datenbank...');
+            const foundName = await searchByGermanName(userInput);
+
+            if (foundName) {
+                pokemonName = foundName;
+                updateLoadingMessage('Lade Pokémon-Daten...');
+                response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+            }
+        }
 
         if (!response.ok) {
             if (response.status === 404) {
@@ -290,10 +362,18 @@ function hideError() {
 
 function showLoading() {
     loadingSpinner.classList.remove('hidden');
+    updateLoadingMessage('Lade Daten...');
 }
 
 function hideLoading() {
     loadingSpinner.classList.add('hidden');
+}
+
+function updateLoadingMessage(message) {
+    const loadingText = loadingSpinner.querySelector('p');
+    if (loadingText) {
+        loadingText.textContent = message;
+    }
 }
 
 function showResults() {
