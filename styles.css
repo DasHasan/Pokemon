@@ -7,42 +7,11 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-    background: #EE1515;
-    background: linear-gradient(180deg, #EE1515 0%, #CC0000 50%, #1a1a1a 50%, #000 100%);
+    background: #f5f5f5;
     min-height: 100vh;
     padding: 0;
-    color: #2c3e50;
+    color: #333;
     position: relative;
-}
-
-body::before {
-    content: '';
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 8px solid rgba(255, 255, 255, 0.2);
-    z-index: 0;
-    pointer-events: none;
-}
-
-body::after {
-    content: '';
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    border: 4px solid rgba(0, 0, 0, 0.3);
-    z-index: 0;
-    pointer-events: none;
 }
 
 .container {
@@ -56,34 +25,34 @@ body::after {
 /* Header */
 header {
     text-align: center;
-    color: white;
-    margin-bottom: 20px;
-    padding: 20px 0 10px;
+    color: #333;
+    margin-bottom: 32px;
+    padding: 40px 0 0;
 }
 
 header h1 {
-    font-size: 1.75rem;
-    font-weight: 800;
-    margin-bottom: 8px;
-    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
-    letter-spacing: 1px;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+    color: #1a1a1a;
 }
 
 .subtitle {
-    font-size: 0.9rem;
-    opacity: 0.95;
-    font-weight: 500;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    font-size: 0.875rem;
+    color: #666;
+    font-weight: 400;
+    letter-spacing: 0.5px;
 }
 
 /* Search Section */
 .search-section {
     background: white;
-    padding: 20px;
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    margin-bottom: 16px;
-    border: 4px solid #FFCB05;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+    border: 1px solid #e5e5e5;
 }
 
 .input-group {
@@ -99,42 +68,41 @@ header h1 {
 
 #pokemonInput {
     width: 100%;
-    padding: 14px 16px;
+    padding: 12px 16px;
     font-size: 1rem;
-    border: 3px solid #3D7DCA;
-    border-radius: 50px;
-    transition: all 0.3s ease;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    transition: all 0.2s ease;
     background: white;
-    font-weight: 500;
+    font-weight: 400;
 }
 
 #pokemonInput:focus {
     outline: none;
-    border-color: #FFCB05;
-    box-shadow: 0 0 0 4px rgba(255, 203, 5, 0.2);
-    transform: translateY(-2px);
+    border-color: #666;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
 }
 
 /* Autocomplete Suggestions */
 .suggestions {
     position: absolute;
-    top: calc(100% + 4px);
+    top: calc(100% + 8px);
     left: 0;
     right: 0;
     background: white;
-    border: 3px solid #FFCB05;
-    border-radius: 16px;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
     max-height: 280px;
     overflow-y: auto;
     z-index: 1000;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .suggestion-item {
-    padding: 14px 18px;
+    padding: 12px 16px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.15s ease;
+    border-bottom: 1px solid #f5f5f5;
     display: flex;
     align-items: center;
     min-height: 48px;
@@ -146,88 +114,65 @@ header h1 {
 
 .suggestion-item:hover,
 .suggestion-item.selected {
-    background: linear-gradient(90deg, #FFCB05 0%, #FFA000 100%);
-    color: white;
-}
-
-.suggestion-item:hover .name-english,
-.suggestion-item.selected .name-english {
-    color: rgba(255, 255, 255, 0.9);
+    background: #f5f5f5;
 }
 
 .suggestion-item .name-german {
-    font-weight: 700;
-    color: #2c3e50;
-}
-
-.suggestion-item:hover .name-german,
-.suggestion-item.selected .name-german {
-    color: white;
+    font-weight: 600;
+    color: #1a1a1a;
 }
 
 .suggestion-item .name-english {
-    font-size: 0.85rem;
-    color: #7f8c8d;
+    font-size: 0.875rem;
+    color: #999;
     margin-left: 8px;
-    font-weight: 500;
+    font-weight: 400;
 }
 
 .btn-primary {
-    padding: 14px 24px;
-    background: #FFCB05;
-    color: #2c3e50;
-    border: 3px solid #3D7DCA;
-    border-radius: 50px;
-    font-size: 1rem;
-    font-weight: 700;
+    padding: 12px 24px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(61, 125, 202, 0.3);
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(61, 125, 202, 0.4);
-    background: #FFD93D;
+    background: #1a1a1a;
 }
 
 .btn-primary:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(61, 125, 202, 0.3);
+    transform: scale(0.98);
 }
 
 .hint {
     font-size: 0.8rem;
-    color: #7f8c8d;
+    color: #999;
     text-align: center;
-    font-weight: 500;
+    font-weight: 400;
 }
 
 /* Error Message */
 .error-message {
     background: #fff;
-    border: 4px solid #EE1515;
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 16px;
+    border: 1px solid #e5e5e5;
+    border-left: 4px solid #d32f2f;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
     display: flex;
-    gap: 15px;
+    gap: 12px;
     align-items: flex-start;
-    box-shadow: 0 8px 32px rgba(238, 21, 21, 0.3);
-    animation: shake 0.5s;
-}
-
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-    20%, 40%, 60%, 80% { transform: translateX(5px); }
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .error-icon {
-    font-size: 2.5rem;
+    font-size: 1.5rem;
     flex-shrink: 0;
 }
 
@@ -236,17 +181,17 @@ header h1 {
 }
 
 .error-title {
-    color: #EE1515;
-    font-size: 1.2rem;
-    margin-bottom: 8px;
-    font-weight: 700;
+    color: #d32f2f;
+    font-size: 1rem;
+    margin-bottom: 6px;
+    font-weight: 600;
 }
 
 .error-details {
-    color: #2c3e50;
+    color: #666;
     line-height: 1.5;
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 0.875rem;
+    font-weight: 400;
 }
 
 /* Loading Spinner */
@@ -254,21 +199,19 @@ header h1 {
     text-align: center;
     padding: 40px;
     background: white;
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border: 4px solid #FFCB05;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e5e5;
 }
 
 .spinner {
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #EE1515;
-    border-right: 5px solid #3D7DCA;
-    border-bottom: 5px solid #FFCB05;
+    border: 3px solid #f0f0f0;
+    border-top: 3px solid #666;
     border-radius: 50%;
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     animation: spin 0.8s linear infinite;
-    margin: 0 auto 15px;
+    margin: 0 auto 16px;
 }
 
 @keyframes spin {
@@ -277,9 +220,9 @@ header h1 {
 }
 
 .loading p {
-    color: #2c3e50;
-    font-weight: 600;
-    font-size: 1rem;
+    color: #666;
+    font-weight: 400;
+    font-size: 0.9rem;
 }
 
 /* Results */
@@ -300,40 +243,28 @@ header h1 {
 
 .pokemon-card {
     background: white;
-    border-radius: 20px;
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    border: 4px solid #FFCB05;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e5e5;
 }
 
 .pokemon-header {
-    background: linear-gradient(135deg, #EE1515 0%, #CC0000 100%);
+    background: #fafafa;
     padding: 24px;
     display: flex;
     align-items: center;
     gap: 20px;
-    color: white;
-    position: relative;
-}
-
-.pokemon-header::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: #FFCB05;
+    border-bottom: 1px solid #e5e5e5;
 }
 
 #pokemonSprite {
     width: 96px;
     height: 96px;
     background: white;
-    border-radius: 50%;
+    border-radius: 12px;
     padding: 8px;
-    border: 4px solid #FFCB05;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 1px solid #e5e5e5;
 }
 
 .pokemon-info {
@@ -341,12 +272,12 @@ header h1 {
 }
 
 #pokemonName {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     margin-bottom: 10px;
     text-transform: capitalize;
-    font-weight: 800;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    letter-spacing: 0.5px;
+    font-weight: 600;
+    color: #1a1a1a;
+    letter-spacing: -0.5px;
 }
 
 .types {
@@ -356,15 +287,13 @@ header h1 {
 }
 
 .type-badge {
-    padding: 6px 16px;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
     text-transform: uppercase;
     color: white;
     letter-spacing: 0.5px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 /* Type Colors */
@@ -391,8 +320,8 @@ header h1 {
 .weaknesses-section,
 .resistances-section,
 .immunities-section {
-    padding: 20px;
-    border-bottom: 2px solid #f0f0f0;
+    padding: 24px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .immunities-section {
@@ -402,38 +331,20 @@ header h1 {
 .weaknesses-section h3,
 .resistances-section h3,
 .immunities-section h3 {
-    font-size: 1.15rem;
-    margin-bottom: 14px;
-    color: #2c3e50;
-    font-weight: 800;
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+    color: #1a1a1a;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.weaknesses-section h3::before {
-    content: '⚡';
-    font-size: 1.3rem;
-}
-
-.resistances-section h3::before {
-    content: '🛡️';
-    font-size: 1.3rem;
-}
-
-.immunities-section h3::before {
-    content: '✨';
-    font-size: 1.3rem;
 }
 
 .weaknesses-grid,
 .resistances-grid,
 .immunities-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 8px;
     margin-bottom: 12px;
 }
 
@@ -441,48 +352,42 @@ header h1 {
 .resistance-item,
 .immunity-item {
     text-align: center;
-    padding: 12px 8px;
-    border-radius: 12px;
-    font-weight: 700;
+    padding: 10px 8px;
+    border-radius: 6px;
+    font-weight: 600;
     position: relative;
     color: white;
     text-transform: uppercase;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     letter-spacing: 0.5px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    min-height: 64px;
+    min-height: 58px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    transition: transform 0.2s ease;
+    transition: opacity 0.2s ease;
 }
 
 .weakness-item:active,
 .resistance-item:active,
 .immunity-item:active {
-    transform: scale(0.95);
+    opacity: 0.8;
 }
 
 .multiplier {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     margin-top: 4px;
-    opacity: 0.95;
-    font-weight: 900;
-    background: rgba(0, 0, 0, 0.2);
-    padding: 2px 8px;
-    border-radius: 10px;
-    margin-top: 6px;
+    opacity: 0.85;
+    font-weight: 700;
 }
 
 .weakness-note,
 .resistance-note,
 .immunity-note {
     font-size: 0.8rem;
-    color: #7f8c8d;
+    color: #999;
     font-style: italic;
-    font-weight: 500;
+    font-weight: 400;
 }
 
 /* Hidden class */
@@ -493,31 +398,21 @@ header h1 {
 /* Footer */
 footer {
     text-align: center;
-    margin-top: 24px;
-    padding: 16px;
-    color: white;
-    font-size: 0.85rem;
-}
-
-footer p {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 12px 20px;
-    border-radius: 50px;
-    display: inline-block;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    font-weight: 600;
+    margin-top: 32px;
+    padding: 24px 16px;
+    color: #999;
+    font-size: 0.8rem;
 }
 
 footer a {
-    color: #FFCB05;
+    color: #666;
     text-decoration: none;
-    font-weight: 700;
-    transition: all 0.2s ease;
+    font-weight: 500;
+    transition: color 0.2s ease;
 }
 
 footer a:hover {
-    color: #FFD93D;
-    text-decoration: underline;
+    color: #333;
 }
 
 /* Smooth scrolling */
@@ -527,53 +422,43 @@ html {
 
 /* Custom scrollbar for suggestions */
 .suggestions::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 
 .suggestions::-webkit-scrollbar-track {
-    background: #f0f0f0;
-    border-radius: 10px;
+    background: #f5f5f5;
 }
 
 .suggestions::-webkit-scrollbar-thumb {
-    background: #FFCB05;
-    border-radius: 10px;
+    background: #d0d0d0;
+    border-radius: 3px;
 }
 
 .suggestions::-webkit-scrollbar-thumb:hover {
-    background: #FFA000;
+    background: #999;
 }
 
 /* Responsive Design */
 @media (max-width: 480px) {
-    body::before {
-        width: 120px;
-        height: 120px;
-    }
-
-    body::after {
-        width: 50px;
-        height: 50px;
-    }
-
     .container {
         padding: 12px;
     }
 
     header {
-        padding: 16px 0 8px;
+        padding: 24px 0 0;
+        margin-bottom: 24px;
     }
 
     header h1 {
-        font-size: 1.5rem;
+        font-size: 1.75rem;
     }
 
     .subtitle {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
 
     .search-section {
-        padding: 16px;
+        padding: 20px;
     }
 
     .input-group {
@@ -583,7 +468,7 @@ html {
 
     .btn-primary {
         width: 100%;
-        padding: 16px 24px;
+        padding: 14px 24px;
     }
 
     .pokemon-header {
@@ -598,27 +483,26 @@ html {
     }
 
     #pokemonName {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
     }
 
     .weaknesses-grid,
     .resistances-grid,
     .immunities-grid {
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-        gap: 8px;
+        grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
     }
 
     .weakness-item,
     .resistance-item,
     .immunity-item {
-        min-height: 60px;
-        font-size: 0.75rem;
+        min-height: 54px;
+        font-size: 0.7rem;
     }
 
-    .weaknesses-section h3,
-    .resistances-section h3,
-    .immunities-section h3 {
-        font-size: 1rem;
+    .weaknesses-section,
+    .resistances-section,
+    .immunities-section {
+        padding: 20px;
     }
 }
 
@@ -629,15 +513,15 @@ html {
     }
 
     header h1 {
-        font-size: 2rem;
+        font-size: 2.25rem;
     }
 
     .subtitle {
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
 
     .search-section {
-        padding: 24px;
+        padding: 28px;
     }
 
     .pokemon-header {
@@ -650,13 +534,19 @@ html {
     }
 
     #pokemonName {
-        font-size: 1.8rem;
+        font-size: 1.7rem;
     }
 
     .weaknesses-grid,
     .resistances-grid,
     .immunities-grid {
-        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+    }
+
+    .weaknesses-section,
+    .resistances-section,
+    .immunities-section {
+        padding: 28px;
     }
 }
 
