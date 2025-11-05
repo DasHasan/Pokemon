@@ -120,6 +120,7 @@ let cacheLoading = false;
 
 // Autocomplete data
 let allPokemonList = [];
+let allPokemonLoading = false;
 let selectedSuggestionIndex = -1;
 
 // DOM Elements
@@ -151,6 +152,16 @@ async function loadAllPokemonNames() {
     if (allPokemonList.length > 0) {
         return allPokemonList;
     }
+
+    if (allPokemonLoading) {
+        // Wait for ongoing load to complete
+        while (allPokemonLoading) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        return allPokemonList;
+    }
+
+    allPokemonLoading = true;
 
     try {
         // Fetch list of Pokemon (covering all generations up to Gen 9)
@@ -189,8 +200,10 @@ async function loadAllPokemonNames() {
         }
 
         allPokemonList = pokemonList;
+        allPokemonLoading = false;
         return pokemonList;
     } catch (error) {
+        allPokemonLoading = false;
         console.error('Error loading Pokemon names:', error);
         throw error;
     }
