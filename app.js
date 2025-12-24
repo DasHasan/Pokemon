@@ -1,4 +1,4 @@
-// Type Effectiveness Chart
+// Type Effectiveness Chart (Defensive)
 const typeEffectiveness = {
     normal: {
         weakTo: ['fighting'],
@@ -89,6 +89,100 @@ const typeEffectiveness = {
         weakTo: ['poison', 'steel'],
         resistantTo: ['fighting', 'bug', 'dark'],
         immuneTo: ['dragon']
+    }
+};
+
+// Offensive Type Effectiveness (what each type is strong against)
+const offensiveTypeEffectiveness = {
+    normal: {
+        superEffectiveAgainst: [],
+        notVeryEffectiveAgainst: ['rock', 'steel'],
+        noEffectAgainst: ['ghost']
+    },
+    fire: {
+        superEffectiveAgainst: ['grass', 'ice', 'bug', 'steel'],
+        notVeryEffectiveAgainst: ['fire', 'water', 'rock', 'dragon'],
+        noEffectAgainst: []
+    },
+    water: {
+        superEffectiveAgainst: ['fire', 'ground', 'rock'],
+        notVeryEffectiveAgainst: ['water', 'grass', 'dragon'],
+        noEffectAgainst: []
+    },
+    electric: {
+        superEffectiveAgainst: ['water', 'flying'],
+        notVeryEffectiveAgainst: ['electric', 'grass', 'dragon'],
+        noEffectAgainst: ['ground']
+    },
+    grass: {
+        superEffectiveAgainst: ['water', 'ground', 'rock'],
+        notVeryEffectiveAgainst: ['fire', 'grass', 'poison', 'flying', 'bug', 'dragon', 'steel'],
+        noEffectAgainst: []
+    },
+    ice: {
+        superEffectiveAgainst: ['grass', 'ground', 'flying', 'dragon'],
+        notVeryEffectiveAgainst: ['fire', 'water', 'ice', 'steel'],
+        noEffectAgainst: []
+    },
+    fighting: {
+        superEffectiveAgainst: ['normal', 'ice', 'rock', 'dark', 'steel'],
+        notVeryEffectiveAgainst: ['poison', 'flying', 'psychic', 'bug', 'fairy'],
+        noEffectAgainst: ['ghost']
+    },
+    poison: {
+        superEffectiveAgainst: ['grass', 'fairy'],
+        notVeryEffectiveAgainst: ['poison', 'ground', 'rock', 'ghost'],
+        noEffectAgainst: ['steel']
+    },
+    ground: {
+        superEffectiveAgainst: ['fire', 'electric', 'poison', 'rock', 'steel'],
+        notVeryEffectiveAgainst: ['grass', 'bug'],
+        noEffectAgainst: ['flying']
+    },
+    flying: {
+        superEffectiveAgainst: ['grass', 'fighting', 'bug'],
+        notVeryEffectiveAgainst: ['electric', 'rock', 'steel'],
+        noEffectAgainst: []
+    },
+    psychic: {
+        superEffectiveAgainst: ['fighting', 'poison'],
+        notVeryEffectiveAgainst: ['psychic', 'steel'],
+        noEffectAgainst: ['dark']
+    },
+    bug: {
+        superEffectiveAgainst: ['grass', 'psychic', 'dark'],
+        notVeryEffectiveAgainst: ['fire', 'fighting', 'poison', 'flying', 'ghost', 'steel', 'fairy'],
+        noEffectAgainst: []
+    },
+    rock: {
+        superEffectiveAgainst: ['fire', 'ice', 'flying', 'bug'],
+        notVeryEffectiveAgainst: ['fighting', 'ground', 'steel'],
+        noEffectAgainst: []
+    },
+    ghost: {
+        superEffectiveAgainst: ['psychic', 'ghost'],
+        notVeryEffectiveAgainst: ['dark'],
+        noEffectAgainst: ['normal']
+    },
+    dragon: {
+        superEffectiveAgainst: ['dragon'],
+        notVeryEffectiveAgainst: ['steel'],
+        noEffectAgainst: ['fairy']
+    },
+    dark: {
+        superEffectiveAgainst: ['psychic', 'ghost'],
+        notVeryEffectiveAgainst: ['fighting', 'dark', 'fairy'],
+        noEffectAgainst: []
+    },
+    steel: {
+        superEffectiveAgainst: ['ice', 'rock', 'fairy'],
+        notVeryEffectiveAgainst: ['fire', 'water', 'electric', 'steel'],
+        noEffectAgainst: []
+    },
+    fairy: {
+        superEffectiveAgainst: ['fighting', 'dragon', 'dark'],
+        notVeryEffectiveAgainst: ['fire', 'poison', 'steel'],
+        noEffectAgainst: []
     }
 };
 
@@ -455,6 +549,34 @@ async function searchPokemon() {
     }
 }
 
+// Calculate offensive type strengths
+function calculateOffensiveStrengths(types) {
+    const strengthsMap = {};
+
+    // For each of the Pokemon's types, collect what they're strong against
+    for (const pokemonType of types) {
+        const typeData = offensiveTypeEffectiveness[pokemonType];
+
+        if (typeData) {
+            // Add super effective types
+            for (const targetType of typeData.superEffectiveAgainst) {
+                if (!strengthsMap[targetType]) {
+                    strengthsMap[targetType] = 0;
+                }
+                strengthsMap[targetType] += 2; // 2x damage
+            }
+        }
+    }
+
+    // Convert to array and sort by effectiveness
+    const strengths = Object.entries(strengthsMap).map(([type, multiplier]) => ({
+        type,
+        multiplier
+    })).sort((a, b) => b.multiplier - a.multiplier);
+
+    return strengths;
+}
+
 // Display Pokemon data
 function displayPokemon(data) {
     hideLoading();
@@ -462,8 +584,11 @@ function displayPokemon(data) {
     // Get Pokemon types
     const types = data.types.map(t => t.type.name);
 
-    // Calculate type effectiveness
+    // Calculate type effectiveness (defensive)
     const effectiveness = calculateTypeEffectiveness(types);
+
+    // Calculate offensive strengths
+    const strengths = calculateOffensiveStrengths(types);
 
     // Update DOM
     document.getElementById('pokemonName').textContent = data.name;
@@ -475,6 +600,9 @@ function displayPokemon(data) {
     typesContainer.innerHTML = types.map(type =>
         `<span class="type-badge type-${type}">${typeNames[type] || type}</span>`
     ).join('');
+
+    // Display offensive strengths
+    displayTypeList('strengthsGrid', strengths, 'strength-item');
 
     // Display weaknesses
     displayTypeList('weaknessesGrid', effectiveness.weaknesses, 'weakness-item');
