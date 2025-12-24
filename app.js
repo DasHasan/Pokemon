@@ -585,3 +585,11 @@ function showResults() {
 function hideResults() {
     results.classList.add('hidden');
 }
+
+// Preload Pokemon names on page load for instant autocomplete
+document.addEventListener('DOMContentLoaded', () => {
+    // Start loading Pokemon names in the background
+    loadAllPokemonNames().catch(error => {
+        console.error('Failed to preload Pokemon names:', error);
+    });
+});
