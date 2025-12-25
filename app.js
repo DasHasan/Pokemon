@@ -1,96 +1,53 @@
-// Type Effectiveness Chart
-const typeEffectiveness = {
-    normal: {
-        weakTo: ['fighting'],
-        resistantTo: [],
-        immuneTo: ['ghost']
-    },
-    fire: {
-        weakTo: ['water', 'ground', 'rock'],
-        resistantTo: ['fire', 'grass', 'ice', 'bug', 'steel', 'fairy'],
-        immuneTo: []
-    },
-    water: {
-        weakTo: ['electric', 'grass'],
-        resistantTo: ['fire', 'water', 'ice', 'steel'],
-        immuneTo: []
-    },
-    electric: {
-        weakTo: ['ground'],
-        resistantTo: ['electric', 'flying', 'steel'],
-        immuneTo: []
-    },
-    grass: {
-        weakTo: ['fire', 'ice', 'poison', 'flying', 'bug'],
-        resistantTo: ['water', 'electric', 'grass', 'ground'],
-        immuneTo: []
-    },
-    ice: {
-        weakTo: ['fire', 'fighting', 'rock', 'steel'],
-        resistantTo: ['ice'],
-        immuneTo: []
-    },
-    fighting: {
-        weakTo: ['flying', 'psychic', 'fairy'],
-        resistantTo: ['bug', 'rock', 'dark'],
-        immuneTo: []
-    },
-    poison: {
-        weakTo: ['ground', 'psychic'],
-        resistantTo: ['grass', 'fighting', 'poison', 'bug', 'fairy'],
-        immuneTo: []
-    },
-    ground: {
-        weakTo: ['water', 'grass', 'ice'],
-        resistantTo: ['poison', 'rock'],
-        immuneTo: ['electric']
-    },
-    flying: {
-        weakTo: ['electric', 'ice', 'rock'],
-        resistantTo: ['grass', 'fighting', 'bug'],
-        immuneTo: ['ground']
-    },
-    psychic: {
-        weakTo: ['bug', 'ghost', 'dark'],
-        resistantTo: ['fighting', 'psychic'],
-        immuneTo: []
-    },
-    bug: {
-        weakTo: ['fire', 'flying', 'rock'],
-        resistantTo: ['grass', 'fighting', 'ground'],
-        immuneTo: []
-    },
-    rock: {
-        weakTo: ['water', 'grass', 'fighting', 'ground', 'steel'],
-        resistantTo: ['normal', 'fire', 'poison', 'flying'],
-        immuneTo: []
-    },
-    ghost: {
-        weakTo: ['ghost', 'dark'],
-        resistantTo: ['poison', 'bug'],
-        immuneTo: ['normal', 'fighting']
-    },
-    dragon: {
-        weakTo: ['ice', 'dragon', 'fairy'],
-        resistantTo: ['fire', 'water', 'electric', 'grass'],
-        immuneTo: []
-    },
-    dark: {
-        weakTo: ['fighting', 'bug', 'fairy'],
-        resistantTo: ['ghost', 'dark'],
-        immuneTo: ['psychic']
-    },
-    steel: {
-        weakTo: ['fire', 'fighting', 'ground'],
-        resistantTo: ['normal', 'grass', 'ice', 'flying', 'psychic', 'bug', 'rock', 'dragon', 'steel', 'fairy'],
-        immuneTo: ['poison']
-    },
-    fairy: {
-        weakTo: ['poison', 'steel'],
-        resistantTo: ['fighting', 'bug', 'dark'],
-        immuneTo: ['dragon']
+// Type Data Cache (loaded from API on first request)
+const typeDataCache = {};
+const typeDataLoading = {};
+
+// Fetch type data from PokeAPI
+async function fetchTypeData(typeName) {
+    // Return cached data if available
+    if (typeDataCache[typeName]) {
+        return typeDataCache[typeName];
     }
-};
+
+    // Wait if already loading
+    if (typeDataLoading[typeName]) {
+        while (typeDataLoading[typeName]) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+        return typeDataCache[typeName];
+    }
+
+    typeDataLoading[typeName] = true;
+
+    try {
+        const response = await fetch(`https://pokeapi.co/api/v2/type/${typeName}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch type data for ${typeName}`);
+        }
+
+        const data = await response.json();
+        const damageRelations = data.damage_relations;
+
+        // Store in cache
+        typeDataCache[typeName] = {
+            // Defensive (what this type is weak/resistant/immune to)
+            weakTo: damageRelations.double_damage_from.map(t => t.name),
+            resistantTo: damageRelations.half_damage_from.map(t => t.name),
+            immuneTo: damageRelations.no_damage_from.map(t => t.name),
+            // Offensive (what this type is strong/weak/has no effect against)
+            superEffectiveAgainst: damageRelations.double_damage_to.map(t => t.name),
+            notVeryEffectiveAgainst: damageRelations.half_damage_to.map(t => t.name),
+            noEffectAgainst: damageRelations.no_damage_to.map(t => t.name)
+        };
+
+        typeDataLoading[typeName] = false;
+        return typeDataCache[typeName];
+    } catch (error) {
+        typeDataLoading[typeName] = false;
+        console.error(`Error fetching type data for ${typeName}:`, error);
+        throw error;
+    }
+}
 
 // German type names mapping
 const typeNames = {
@@ -435,7 +392,7 @@ async function searchPokemon() {
         }
 
         const data = await response.json();
-        displayPokemon(data);
+        await displayPokemon(data);
 
     } catch (error) {
         hideLoading();
@@ -455,15 +412,48 @@ async function searchPokemon() {
     }
 }
 
+// Calculate offensive type strengths
+async function calculateOffensiveStrengths(types) {
+    const strengthsMap = {};
+
+    // Fetch type data for all Pokemon types
+    const typeDataPromises = types.map(type => fetchTypeData(type));
+    const typesData = await Promise.all(typeDataPromises);
+
+    // For each of the Pokemon's types, collect what they're strong against
+    for (const typeData of typesData) {
+        if (typeData) {
+            // Add super effective types
+            for (const targetType of typeData.superEffectiveAgainst) {
+                if (!strengthsMap[targetType]) {
+                    strengthsMap[targetType] = 0;
+                }
+                strengthsMap[targetType] += 2; // 2x damage
+            }
+        }
+    }
+
+    // Convert to array and sort by effectiveness
+    const strengths = Object.entries(strengthsMap).map(([type, multiplier]) => ({
+        type,
+        multiplier
+    })).sort((a, b) => b.multiplier - a.multiplier);
+
+    return strengths;
+}
+
 // Display Pokemon data
-function displayPokemon(data) {
+async function displayPokemon(data) {
     hideLoading();
 
     // Get Pokemon types
     const types = data.types.map(t => t.type.name);
 
-    // Calculate type effectiveness
-    const effectiveness = calculateTypeEffectiveness(types);
+    // Calculate type effectiveness (defensive) and offensive strengths in parallel
+    const [effectiveness, strengths] = await Promise.all([
+        calculateTypeEffectiveness(types),
+        calculateOffensiveStrengths(types)
+    ]);
 
     // Update DOM
     document.getElementById('pokemonName').textContent = data.name;
@@ -475,6 +465,9 @@ function displayPokemon(data) {
     typesContainer.innerHTML = types.map(type =>
         `<span class="type-badge type-${type}">${typeNames[type] || type}</span>`
     ).join('');
+
+    // Display offensive strengths
+    displayTypeList('strengthsGrid', strengths, 'strength-item');
 
     // Display weaknesses
     displayTypeList('weaknessesGrid', effectiveness.weaknesses, 'weakness-item');
@@ -495,16 +488,22 @@ function displayPokemon(data) {
 }
 
 // Calculate combined type effectiveness
-function calculateTypeEffectiveness(types) {
+async function calculateTypeEffectiveness(types) {
     const multipliers = {};
 
+    // Fetch type data for all Pokemon types
+    const typeDataPromises = types.map(type => fetchTypeData(type));
+    const typesData = await Promise.all(typeDataPromises);
+
+    // All possible attacking types
+    const allTypes = ['normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 'poison',
+                      'ground', 'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy'];
+
     // Calculate multipliers for each attacking type
-    for (const attackType of Object.keys(typeEffectiveness)) {
+    for (const attackType of allTypes) {
         let multiplier = 1;
 
-        for (const defenseType of types) {
-            const typeData = typeEffectiveness[defenseType];
-
+        for (const typeData of typesData) {
             if (typeData.immuneTo.includes(attackType)) {
                 multiplier = 0;
             } else if (typeData.weakTo.includes(attackType)) {

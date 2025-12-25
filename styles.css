@@ -469,7 +469,8 @@ header h1:hover {
 .type-steel { background: #B8B8D0; }
 .type-fairy { background: #EE99AC; }
 
-/* Weaknesses Section */
+/* Type Effectiveness Sections */
+.strengths-section,
 .weaknesses-section,
 .resistances-section,
 .immunities-section {
@@ -481,6 +482,7 @@ header h1:hover {
     border-bottom: none;
 }
 
+.strengths-section h3,
 .weaknesses-section h3,
 .resistances-section h3,
 .immunities-section h3 {
@@ -494,6 +496,7 @@ header h1:hover {
     padding-bottom: 8px;
 }
 
+.strengths-section h3::after,
 .weaknesses-section h3::after,
 .resistances-section h3::after,
 .immunities-section h3::after {
@@ -513,6 +516,7 @@ header h1:hover {
     to { width: 40px; }
 }
 
+.strengths-grid,
 .weaknesses-grid,
 .resistances-grid,
 .immunities-grid {
@@ -522,6 +526,7 @@ header h1:hover {
     margin-bottom: 12px;
 }
 
+.strength-item,
 .weakness-item,
 .resistance-item,
 .immunity-item {
@@ -544,6 +549,12 @@ header h1:hover {
     cursor: pointer;
 }
 
+.strength-item:nth-child(1) { animation-delay: 0.05s; }
+.strength-item:nth-child(2) { animation-delay: 0.1s; }
+.strength-item:nth-child(3) { animation-delay: 0.15s; }
+.strength-item:nth-child(4) { animation-delay: 0.2s; }
+.strength-item:nth-child(5) { animation-delay: 0.25s; }
+
 .weakness-item:nth-child(1) { animation-delay: 0.05s; }
 .weakness-item:nth-child(2) { animation-delay: 0.1s; }
 .weakness-item:nth-child(3) { animation-delay: 0.15s; }
@@ -559,6 +570,7 @@ header h1:hover {
 .immunity-item:nth-child(1) { animation-delay: 0.05s; }
 .immunity-item:nth-child(2) { animation-delay: 0.1s; }
 
+.strength-item:hover,
 .weakness-item:hover,
 .resistance-item:hover,
 .immunity-item:hover {
@@ -566,6 +578,7 @@ header h1:hover {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
+.strength-item:active,
 .weakness-item:active,
 .resistance-item:active,
 .immunity-item:active {
@@ -580,6 +593,7 @@ header h1:hover {
     font-weight: 700;
 }
 
+.strength-note,
 .weakness-note,
 .resistance-note,
 .immunity-note {
@@ -702,12 +716,14 @@ html {
         font-size: 1.3rem;
     }
 
+    .strengths-grid,
     .weaknesses-grid,
     .resistances-grid,
     .immunities-grid {
         grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
     }
 
+    .strength-item,
     .weakness-item,
     .resistance-item,
     .immunity-item {
@@ -715,6 +731,7 @@ html {
         font-size: 0.7rem;
     }
 
+    .strengths-section,
     .weaknesses-section,
     .resistances-section,
     .immunities-section {
@@ -753,12 +770,14 @@ html {
         font-size: 1.7rem;
     }
 
+    .strengths-grid,
     .weaknesses-grid,
     .resistances-grid,
     .immunities-grid {
         grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
     }
 
+    .strengths-section,
     .weaknesses-section,
     .resistances-section,
     .immunities-section {
